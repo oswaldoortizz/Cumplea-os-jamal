@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡El Tesoro de Cumpleaños!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=Open+Sans:wght@400;700&display=swap');
+
+        /* Paleta de Colores y Variables */
+        :root {
+            --grand-line-blue: #1C7ED6;
+            --pirate-red: #E03131;
+            --beli-gold: #FCC419;
+            --jolly-black: #212529;
+            --canvas-white: #F8F9FA;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--grand-line-blue);
+            color: var(--jolly-black);
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle, #228be6 0%, #1864ab 100%);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Pirata One', cursive;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            background-color: var(--canvas-white);
+            border: 8px solid var(--jolly-black);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 10px 10px 0px var(--jolly-black);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        button {
+            background-color: var(--pirate-red);
+            color: var(--canvas-white);
+            border: 3px solid var(--jolly-black);
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-family: 'Pirata One', cursive;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #c92a2a;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Desafíos */
+        .challenge-box {
+            border: 2px dashed var(--jolly-black);
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #fff9e6;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid var(--jolly-black);
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        /* Grid para banderas */
+        .flag-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .flag-grid img {
+            width: 30%;
+            max-width: 160px;
+            border: 4px solid transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.12s, border-color 0.18s, opacity 0.18s;
+        }
+
+        .flag-grid img:hover {
+            transform: translateY(-4px);
+            border-color: #ccc;
+        }
+
+        /* Cartel de Recompensa */
+        .bounty-poster {
+            background-color: #e6ccaa;
+            border: 15px solid #8b5a2b;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+        }
+
+        .bounty-title {
+            font-size: 4rem;
+            color: var(--jolly-black);
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .bounty-name {
+            font-size: 3.5rem;
+            color: var(--pirate-red);
+            margin: 10px 0;
+        }
+
+        .bounty-amount {
+            font-size: 2.5rem;
+            font-family: 'Pirata One', cursive;
+            margin-top: 20px;
+        }
+
+        .poneglyph-tracker {
+            font-weight: bold;
+            color: var(--beli-gold);
+            background: var(--jolly-black);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA 1: Introducción -->
+    <div id="intro-screen" class="container">
+        <h1>¡La Isla de las Fiestas!</h1>
+        <p>¡Shishishi! Hemos encontrado las coordenadas de una isla legendaria llena de carne y celebraciones, pero el Log Pose está descontrolado.</p>
+        <p>¡Necesitamos que resuelvas los desafíos de la tripulación para reunir los 3 Poneglyphs y trazar el rumbo!</p>
+        <button onclick="startAdventure()">¡Zarpar!</button>
+    </div>
+
+    <!-- PANTALLA 2: Los Desafíos -->
+    <div id="map-screen" class="container hidden">
+        <h2>El Nuevo Mundo</h2>
+        <div class="poneglyph-tracker">Poneglyphs encontrados: <span id="score">0</span> / <span id="required">3</span></div>
+
+        <!-- Desafío Nami -->
+        <div class="challenge-box" id="nami-box">
+            <h3>Navegación de Nami</h3>
+            <p>Calibra el Log Pose. Haz clic en el botón 3 veces para estabilizar la aguja magnética.</p>
+            <button id="nami-btn" onclick="solveNami()">Calibrar (0/3)</button>
+        </div>
+
+        <!-- Desafío Zoro -->
+        <div class="challenge-box" id="zoro-box">
+            <h3>El Laberinto de Zoro</h3>
+            <p>Zoro se ha perdido de nuevo. Dile que vaya a la <strong>DERECHA</strong> (pero ya sabes cómo es él con las direcciones...).</p>
+            <button onclick="failZoro()">Derecha</button>
+            <button onclick="solveZoro()">Izquierda</button>
+            <p id="zoro-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Desafío Robin -->
+        <div class="challenge-box" id="robin-box">
+            <h3>Acertijo de Robin</h3>
+            <p>"Soy buscada por muchos, pero encontrada por pocos. Nazco del mar, pero te quito la capacidad de nadar a cambio de poder. ¿Qué soy?"</p>
+            <input type="text" id="robin-input" placeholder="Escribe tu respuesta aquí...">
+            <br>
+            <button onclick="solveRobin()">Responder</button>
+            <p id="robin-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Minijuego: Adivina el número -->
+        <div class="challenge-box" id="guess-box">
+            <h3>Adivina el número</h3>
+            <p>He pensado un número entre 1 y 5. ¡Adivínalo para obtener un Poneglyph!</p>
+            <input type="text" id="guess-input" placeholder="Número (1-5)">
+            <br>
+            <button id="guess-btn" onclick="solveGuess()">Adivinar</button>
+            <p id="guess-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Minijuego: Trivia Barba Blanca -->
+        <div class="challenge-box" id="trivia-box">
+            <h3>Trivia Barba Blanca</h3>
+            <p>¿Quién es el legendario capitán conocido como Barba Blanca?</p>
+            <button onclick="solveTrivia('edward')">Edward Newgate</button>
+            <button onclick="solveTrivia('luffy')">Monkey D. Luffy</button>
+            <button onclick="solveTrivia('roger')">Gol D. Roger</button>
+            <p id="trivia-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Minijuego: Encuentra la bandera -->
+        <div class="challenge-box" id="flag-box">
+            <h3>Encuentra la bandera</h3>
+            <p>Selecciona la bandera correcta de la banda de Barba Blanca.</p>
+            <div class="flag-grid">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9cd7Q2E_4_RA3rrrwd8TD44Go5_-Sa5Li8M39D_d3dA&s=10" alt="Bandera de Law" onclick="solveFlag('law')">
+                <img src="https://i.pinimg.com/564x/d4/17/ba/d417ba6d037fe613df2697c388cb2cb9.jpg" alt="Bandera de Shanks" onclick="solveFlag('shanks')">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQ5Q34NKhu_YwhfBAfx2xDHDX3X5ut9pJSr6F8VygBX5UV1CP-uPLMnk&s=10" alt="Bandera de Barba Blanca" onclick="solveFlag('whitebeard')">
+            </div>
+            <p id="flag-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Minijuego: Adivina el miembro -->
+        <div class="challenge-box" id="member-box">
+            <h3>Adivina el miembro</h3>
+            <p>Desordené el nombre de un miembro famoso de la tripulación. Adivínalo: <strong>acrom</strong></p>
+            <input type="text" id="member-input" placeholder="Escribe el nombre...">
+            <br>
+            <button id="member-btn" onclick="solveMember()">Enviar</button>
+            <p id="member-feedback" style="color: red; font-size: 0.9rem;"></p>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: Recompensa Final -->
+    <div id="reveal-screen" class="container hidden bounty-poster">
+        <h1 class="bounty-title">Celebrated</h1>
+        <h2>¡Has llegado a la Isla!</h2>
+        <div class="bounty-name">¡Feliz Cumpleaños, <br>Jamal!</div>
+        <p>¡La banda de Barba Blanca te desea el mejor de los días en tu aventura por el Grand Line!</p>
+        <img src="https://gbaike-image.cdn.bcebos.com/fc1f4134970a304e251f6a2c4f9cb086c9177e3ef692/fc1f4134970a304e251f6a2c4f9cb086c9177e3ef692_url?x-bce-process=image/format,f_auto/resize,m_lfit,h_1024,limit_1" alt="Imagen de Barba Blanca" style="max-width:100%; margin-top:15px; border:6px solid #8b5a2b;">
+        <div class="bounty-amount"><span style="font-family: sans-serif;">฿</span> 22,000,000</div>
+    </div>
+
+    <script>
+        let poneglyphs = 0;
+        let namiClicks = 0;
+        let namiSolved = false;
+        let zoroSolved = false;
+        let robinSolved = false;
+        let guessSolved = false;
+        let triviaSolved = false;
+        let flagSolved = false;
+        let memberSolved = false;
+        let guessSecret = 0;
+        let requiredPoneglyphs = 3; // se recalcula al iniciar
+
+        function startAdventure() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('map-screen').classList.remove('hidden');
+            // Inicializar minijuegos adicionales
+            guessSecret = Math.floor(Math.random() * 5) + 1; // 1-5
+            // recalcular cuántos desafíos hay: todos los elementos con clase challenge-box
+            requiredPoneglyphs = document.querySelectorAll('#map-screen .challenge-box').length;
+            document.getElementById('required').innerText = requiredPoneglyphs;
+        }
+
+        function checkWin() {
+            document.getElementById('score').innerText = poneglyphs;
+            if (poneglyphs === requiredPoneglyphs) {
+                setTimeout(() => {
+                    document.getElementById('map-screen').classList.add('hidden');
+                    document.getElementById('reveal-screen').classList.remove('hidden');
+                }, 800);
+            }
+        }
+
+        // Lógica de Nami
+        function solveNami() {
+            if (namiSolved) return;
+            namiClicks++;
+            const btn = document.getElementById('nami-btn');
+            btn.innerText = `Calibrar (${namiClicks}/3)`;
+            
+            if (namiClicks >= 3) {
+                namiSolved = true;
+                btn.innerText = "¡Calibrado!";
+                btn.disabled = true;
+                btn.style.backgroundColor = "green";
+                poneglyphs++;
+                checkWin();
+            }
+        }
+
+        // Lógica de Zoro
+        function failZoro() {
+            if (zoroSolved) return;
+            document.getElementById('zoro-feedback').innerText = "¡Zoro se fue hacia el otro lado y se perdió más!";
+        }
+
+        function solveZoro() {
+            if (zoroSolved) return;
+            zoroSolved = true;
+            document.getElementById('zoro-feedback').innerText = "¡Usaste lógica inversa! Zoro encontró la salida.";
+            document.getElementById('zoro-feedback').style.color = "green";
+            const buttons = document.querySelectorAll('#zoro-box button');
+            buttons.forEach(b => b.disabled = true);
+            poneglyphs++;
+            checkWin();
+        }
+
+        // Lógica de Robin
+        function solveRobin() {
+            if (robinSolved) return;
+            const answer = document.getElementById('robin-input').value.toLowerCase();
+            if (answer.includes("fruta") && answer.includes("diablo")) {
+                robinSolved = true;
+                document.getElementById('robin-feedback').innerText = "¡Correcto! Has leído el Poneglyph.";
+                document.getElementById('robin-feedback').style.color = "green";
+                document.getElementById('robin-input').disabled = true;
+                document.querySelector('#robin-box button').disabled = true;
+                poneglyphs++;
+                checkWin();
+            } else {
+                document.getElementById('robin-feedback').innerText = "Esa no es la respuesta correcta. Intenta de nuevo.";
+            }
+        }
+
+        // Minijuego 1: Adivina el número
+        function solveGuess() {
+            if (guessSolved) return;
+            const val = parseInt(document.getElementById('guess-input').value, 10);
+            if (!val || isNaN(val)) {
+                document.getElementById('guess-feedback').innerText = 'Ingresa un número entre 1 y 5.';
+                return;
+            }
+            if (val === guessSecret) {
+                guessSolved = true;
+                document.getElementById('guess-feedback').innerText = '¡Acertaste! Has recuperado un Poneglyph.';
+                document.getElementById('guess-feedback').style.color = 'green';
+                document.getElementById('guess-input').disabled = true;
+                document.getElementById('guess-btn').disabled = true;
+                poneglyphs++;
+                checkWin();
+            } else {
+                document.getElementById('guess-feedback').innerText = 'No es ese número. Intenta otra vez.';
+            }
+        }
+
+        // Minijuego: Trivia Barba Blanca
+        function solveTrivia(choice) {
+            if (triviaSolved) return;
+            if (choice === 'edward') {
+                triviaSolved = true;
+                document.getElementById('trivia-feedback').innerText = '¡Correcto! Barba Blanca es Edward Newgate.';
+                document.getElementById('trivia-feedback').style.color = 'green';
+                // deshabilitar botones
+                document.querySelectorAll('#trivia-box button').forEach(b => b.disabled = true);
+                poneglyphs++;
+                checkWin();
+            } else {
+                document.getElementById('trivia-feedback').innerText = 'No, intenta de nuevo.';
+            }
+        }
+
+        // Minijuego: Selección de bandera
+        function solveFlag(choice) {
+            if (flagSolved) return;
+                if (choice === 'whitebeard') {
+                    flagSolved = true;
+                    document.getElementById('flag-feedback').innerText = '¡Correcto! Esa es la bandera de la banda de Barba Blanca.';
+                    document.getElementById('flag-feedback').style.color = 'green';
+                    document.querySelectorAll('#flag-box img').forEach(i => { i.style.opacity = '0.5'; i.style.pointerEvents = 'none'; });
+                    // resaltar la correcta
+                    const imgs = document.querySelectorAll('#flag-box img');
+                    imgs.forEach(img => { if (img.alt && img.alt.toLowerCase().includes('barba blanca')) { img.style.opacity = '1'; img.style.borderColor = 'green'; } });
+                    poneglyphs++;
+                    checkWin();
+                } else {
+                    document.getElementById('flag-feedback').innerText = 'Esa no es la bandera correcta.';
+                }
+        }
+
+        // Minijuego: Adivina el miembro (acrom -> Marco)
+        function solveMember() {
+            if (memberSolved) return;
+            const val = document.getElementById('member-input').value.trim().toLowerCase();
+            if (!val) {
+                document.getElementById('member-feedback').innerText = 'Escribe un nombre.';
+                return;
+            }
+            if (val === 'marco') {
+                memberSolved = true;
+                document.getElementById('member-feedback').innerText = '¡Correcto! Marco es el miembro.';
+                document.getElementById('member-feedback').style.color = 'green';
+                document.getElementById('member-input').disabled = true;
+                document.getElementById('member-btn').disabled = true;
+                poneglyphs++;
+                checkWin();
+            } else {
+                document.getElementById('member-feedback').innerText = 'No es correcto. Intenta de nuevo.';
+            }
+        }
+    </script>
+</body>
+</html>
